@@ -1,0 +1,81 @@
+# =============================================================================
+
+# Graphify Ignore - Laravel Project
+
+# =============================================================================
+
+# Exclude dependency, cache, and generated folders to keep graph clean and fast.
+
+# =============================================================================
+
+# --- PHP / Laravel ---
+
+vendor/
+bootstrap/cache/
+storage/framework/
+storage/logs/
+storage/debugbar/
+
+# --- Node / Frontend ---
+
+node_modules/
+public/build/
+public/hot/
+public/storage/
+
+# --- Compiled / Generated ---
+
+_.min.js
+_.min.css
+_.map
+_.cache
+\*.compiled
+
+# --- IDE / Editor ---
+
+.idea/
+.vscode/
+_.swp
+_.swo
+\*~
+
+# --- OS ---
+
+.DS_Store
+Thumbs.db
+
+# --- Git ---
+
+.git/
+.gitattributes
+
+# --- Environment ---
+
+.env
+.env.\*
+!.env.example
+
+# --- Docker / DevOps (if present) ---
+
+docker-compose.override.yml
+
+# --- Test coverage reports ---
+
+coverage/
+.nyc_output/
+
+# --- Lock files (large, no structural value) ---
+
+composer.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- AI / Agent config (no code structure) ---
+
+.claude/
+.opencode/
+.agents/
+.mcp.json
+CLAUDE.md
+AGENTS.md
