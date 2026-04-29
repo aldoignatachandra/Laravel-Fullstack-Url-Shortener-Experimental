@@ -1,11 +1,28 @@
 <?php
 
+use App\Services\Auth\PasswordResetOtpService;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.guest')] class extends Component
 {
     public string $email = '';
+
+    /**
+     * Send a password reset code.
+     */
+    public function sendOtp(PasswordResetOtpService $passwordResetOtpService): void
+    {
+        $validated = $this->validate([
+            'email' => ['required', 'string', 'email'],
+        ]);
+
+        $email = $passwordResetOtpService->sendOtp(request(), $validated['email']);
+
+        session()->flash('status', 'We sent a reset code to your email. Check your inbox and spam folder.');
+
+        $this->redirectRoute('password.otp', ['email' => $email], navigate: true);
+    }
 }; ?>
 
 <div>
@@ -16,12 +33,11 @@ new #[Layout('layouts.guest')] class extends Component
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
+    <form wire:submit="sendOtp">
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
+            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="email" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -33,8 +49,18 @@ new #[Layout('layouts.guest')] class extends Component
                 {{ __('Back to login') }}
             </a>
 
-            <x-primary-button>
-                {{ __('Send Reset Code') }}
+            <x-primary-button wire:loading.attr="disabled" wire:target="sendOtp">
+                <span wire:loading.remove wire:target="sendOtp">
+                    {{ __('Send Reset Code') }}
+                </span>
+
+                <span wire:loading wire:target="sendOtp" class="inline-flex items-center gap-2">
+                    <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+                    </svg>
+                    {{ __('Sending...') }}
+                </span>
             </x-primary-button>
         </div>
     </form>

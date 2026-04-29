@@ -48,7 +48,7 @@ class PasswordResetTest extends TestCase
 
         PasswordResetOtp::create([
             'email' => 'test@example.com',
-            'otp' => '654321',
+            'otp' => Hash::make('654321'),
             'expires_at' => now()->addMinutes(15),
         ]);
 

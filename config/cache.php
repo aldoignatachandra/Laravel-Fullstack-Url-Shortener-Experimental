@@ -17,6 +17,8 @@ return [
 
     'default' => env('CACHE_STORE', 'database'),
 
+    'limiter' => env('CACHE_LIMITER', 'rate_limiter'),
+
     /*
     |--------------------------------------------------------------------------
     | Cache Stores
@@ -96,6 +98,14 @@ return [
             'stores' => [
                 'database',
                 'array',
+            ],
+        ],
+
+        'rate_limiter' => [
+            'driver' => 'failover',
+            'stores' => [
+                'redis',
+                'database',
             ],
         ],
 

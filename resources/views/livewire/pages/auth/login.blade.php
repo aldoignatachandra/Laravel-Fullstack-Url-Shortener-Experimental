@@ -23,7 +23,39 @@ new #[Layout('layouts.guest')] class extends Component {
     }
 }; ?>
 
-<div>
+<div x-data="{
+    googleModalOpen: false,
+    closeGoogleModal() {
+        this.googleModalOpen = false;
+        this.$nextTick(() => this.$refs.googleButton?.focus());
+    },
+    trapGoogleModalFocus(event) {
+        const focusableElements = Array.from(this.$refs.googleDialog.querySelectorAll('a[href], button:not([disabled])'));
+        const firstFocusableElement = focusableElements[0];
+        const lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+        if (! this.$refs.googleDialog.contains(document.activeElement)) {
+            event.preventDefault();
+            (event.shiftKey ? lastFocusableElement : firstFocusableElement).focus();
+
+            return;
+        }
+
+        if (event.shiftKey && document.activeElement === firstFocusableElement) {
+            event.preventDefault();
+            lastFocusableElement.focus();
+
+            return;
+        }
+
+        if (! event.shiftKey && document.activeElement === lastFocusableElement) {
+            event.preventDefault();
+            firstFocusableElement.focus();
+        }
+    },
+}"
+     x-init="$watch('googleModalOpen', value => value && $nextTick(() => $refs.gotItButton?.focus()))"
+     x-effect="googleModalOpen ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -111,5 +143,87 @@ new #[Layout('layouts.guest')] class extends Component {
                 </span>
             </x-primary-button>
         </div>
+
     </form>
+
+    <div class="my-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-surface-border"></div>
+        <span class="text-xs uppercase tracking-[0.18em] text-surface-mid-gray">{{ __('or continue with') }}</span>
+        <div class="h-px flex-1 bg-surface-border"></div>
+    </div>
+
+    <button type="button"
+            x-ref="googleButton"
+            x-on:click="googleModalOpen = true"
+            wire:loading.attr="disabled"
+            wire:target="login"
+            class="inline-flex w-full items-center justify-center gap-3 rounded-md border border-surface-border bg-surface-dark px-4 py-2.5 text-sm font-medium text-surface-off-white hover:border-surface-mid-border hover:bg-surface-border/50 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:ring-offset-surface-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.24 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" />
+            <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84Z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9c.87-2.6 3.3-4.52 6.16-4.52Z" />
+        </svg>
+        {{ __('Continue with Google') }}
+    </button>
+
+    <div x-show="googleModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-on:keydown.escape="closeGoogleModal()"
+         x-on:keydown.tab.window="googleModalOpen && trapGoogleModalFocus($event)"
+         x-on:focusin.window="googleModalOpen && ! $refs.googleDialog.contains($event.target) && $refs.gotItButton?.focus()"
+         class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+         x-cloak>
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" x-on:click="closeGoogleModal()"></div>
+
+        <div x-show="googleModalOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="google-modal-title"
+             x-ref="googleDialog"
+             class="relative w-full max-w-md rounded-xl border border-surface-border bg-surface-dark p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+            <div class="flex items-start gap-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand/15">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 10.5 10.5A10.512 10.512 0 0 0 12 1.5Zm0 19.125A8.625 8.625 0 1 1 20.625 12 8.635 8.635 0 0 1 12 20.625Zm.938-13.313a.938.938 0 1 1-1.875 0 .938.938 0 0 1 1.875 0ZM11.25 10.5h1.5v6h-1.5v-6Z" />
+                    </svg>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <h2 id="google-modal-title" class="text-lg font-semibold text-surface-off-white">
+                        {{ __('Google sign-in coming soon') }}
+                    </h2>
+                    <p class="mt-2 text-sm leading-6 text-surface-mid-gray">
+                        {{ __('We are preparing Google OAuth. For now, please use email and password to sign in.') }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button type="button"
+                        x-ref="gotItButton"
+                        x-on:click="closeGoogleModal()"
+                        class="inline-flex items-center justify-center rounded-md border border-surface-border bg-transparent px-4 py-2 text-sm font-medium text-surface-off-white hover:bg-surface-border/50 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:ring-offset-surface-dark transition-colors">
+                    {{ __('Got it') }}
+                </button>
+
+                <a href="{{ route('register') }}" wire:navigate
+                   x-on:click="document.body.classList.remove('overflow-hidden')"
+                   class="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-surface-black hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:ring-offset-surface-dark transition-colors">
+                    {{ __('Create account') }}
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
