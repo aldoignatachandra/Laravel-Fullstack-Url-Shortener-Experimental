@@ -52,6 +52,37 @@ class LinkDetailTest extends TestCase
         $response->assertSee('7'); // total clicks
     }
 
+    public function test_shows_empty_click_trend_state(): void
+    {
+        $user = User::factory()->create();
+        $link = Link::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->get("/links/{$link->id}");
+
+        $response->assertOk();
+        $response->assertSee('Clicks Trend');
+        $response->assertSee('7 days');
+        $response->assertSee('30 days');
+        $response->assertSee('No clicks in this period');
+    }
+
+    public function test_click_trend_shows_bars_when_clicks_exist(): void
+    {
+        $user = User::factory()->create();
+        $link = Link::factory()->create(['user_id' => $user->id]);
+        LinkLog::factory()->create([
+            'link_id' => $link->id,
+            'clicked_at' => now()->subDay(),
+        ]);
+
+        $response = $this->actingAs($user)->get("/links/{$link->id}");
+
+        $response->assertOk();
+        $response->assertSee('Clicks Trend');
+        $response->assertDontSee('No clicks in this period');
+        $response->assertSee('bg-brand/40', false);
+    }
+
     public function test_shows_unique_visitors(): void
     {
         $user = User::factory()->create();
