@@ -25,6 +25,14 @@ new #[Layout('layouts.guest')] class extends Component {
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Check if email belongs to a Google user
+        $existingUser = User::where('email', $validated['email'])->first();
+        if ($existingUser && $existingUser->isGoogleUser()) {
+            $this->addError('email', 'This email is linked to a Google account. Please login with Google.');
+
+            return;
+        }
+
         $validated['password'] = Hash::make($validated['password']);
 
         event(new Registered(($user = User::create($validated))));

@@ -30,6 +30,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'google_id' => null,
+            'google_avatar' => null,
         ];
     }
 
@@ -40,6 +42,18 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a Google user.
+     */
+    public function google(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'google_id' => fake()->unique()->numerify('##############'),
+            'google_avatar' => fake()->imageUrl(100, 100, 'avatar'),
+            'password' => null,
         ]);
     }
 }

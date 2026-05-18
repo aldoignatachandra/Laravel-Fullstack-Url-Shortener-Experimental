@@ -1,14 +1,25 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Requests\StoreLinkRequest;
 use App\Models\Link;
 use App\Models\LinkLog;
 use App\Services\ShortCodeService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::get('/s/{short_code}', function (string $short_code) {
+// Google OAuth routes
+Route::get('/auth/google', [GoogleController::class, 'redirect'])
+    ->name('auth.google')
+    ->middleware('throttle:5,1');
+
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
+    ->name('auth.google.callback');
+
+Route::get('/s/{short_code}', function (string $short_code, Request $request) {
     $link = Link::where('short_code', $short_code)
         ->where('status', Link::STATUS_ACTIVE)
         ->firstOrFail();
@@ -22,16 +33,16 @@ Route::get('/s/{short_code}', function (string $short_code) {
     LinkLog::create([
         'link_id' => $link->id,
         'clicked_at' => now(),
-        'ip_address' => request()->ip(),
-        'user_agent' => mb_substr(request()->userAgent() ?? '', 0, 500),
-        'referrer' => filter_var(request()->header('referer'), FILTER_VALIDATE_URL) ?: null,
+        'ip_address' => $request->ip(),
+        'user_agent' => mb_substr($request->userAgent() ?? '', 0, 500),
+        'referrer' => filter_var($request->header('referer'), FILTER_VALIDATE_URL) ?: null,
     ]);
 
     return redirect($link->original_url, 301);
 })->middleware('smart.throttle:api')->name('redirect');
 
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
 
@@ -45,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $validated = $request->validated();
 
         Link::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'original_url' => $validated['original_url'],
             'title' => $validated['title'] ?: null,
             'short_code' => ShortCodeService::generateUnique(),

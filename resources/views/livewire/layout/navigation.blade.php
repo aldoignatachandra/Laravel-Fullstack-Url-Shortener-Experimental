@@ -78,6 +78,18 @@ new class extends Component {
         <!-- User Actions -->
         <div class="px-3 py-4 shrink-0 mt-auto border-t border-surface-border">
             <div class="flex items-center gap-3 px-3 mb-3">
+                {{-- Avatar --}}
+                @if(auth()->user()?->google_avatar)
+                    <img src="{{ auth()->user()->google_avatar }}"
+                         alt="{{ auth()->user()->name }}"
+                         class="w-8 h-8 rounded-full object-cover"
+                         referrerpolicy="no-referrer" />
+                @else
+                    <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center text-xs font-medium text-brand">
+                        {{ auth()->user()?->initials }}
+                    </div>
+                @endif
+
                 <div class="flex-1 min-w-0">
                     <div class="text-sm font-medium text-surface-off-white truncate" x-data="{{ json_encode(['name' => auth()->user()?->name ?? '']) }}"
                         x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
