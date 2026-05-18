@@ -18,16 +18,16 @@ new #[Layout('layouts.app')] class extends Component
     #[Computed]
     public function totalClicks(): int
     {
-        return LinkLog::whereIn('link_id', function ($query) {
-            $query->select('id')->from('links')->where('user_id', Auth::id());
+        return LinkLog::whereHas('link', function ($query) {
+            $query->where('user_id', Auth::id());
         })->count();
     }
 
     #[Computed]
     public function uniqueVisitors(): int
     {
-        return LinkLog::whereIn('link_id', function ($query) {
-            $query->select('id')->from('links')->where('user_id', Auth::id());
+        return LinkLog::whereHas('link', function ($query) {
+            $query->where('user_id', Auth::id());
         })->distinct('ip_address')->count('ip_address');
     }
 
