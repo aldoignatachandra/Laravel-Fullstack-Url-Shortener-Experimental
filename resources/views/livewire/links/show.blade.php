@@ -31,7 +31,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public function getRecentClicksProperty()
     {
-        return $this->link->logs()->latest('clicked_at')->take(10)->get();
+        return $this->link->logs()->latest('clicked_at')->get();
     }
 
     public function getTopReferrersProperty()
@@ -198,7 +198,7 @@ new #[Layout('layouts.app')] class extends Component
                     </table>
 
                     {{-- Visual bar chart --}}
-                    <div class="overflow-x-auto pb-2 -mx-2 px-2">
+                    <div class="overflow-hidden pb-2 -mx-2 px-2">
                         <div class="flex items-end justify-center min-w-max {{ $trendDays === 7 ? 'gap-2' : 'gap-1 sm:gap-1.5' }}" role="img" aria-label="Clicks trend chart showing {{ $this->trendData['total'] }} total clicks over {{ $trendDays }} days">
                             @foreach($this->trendData['days'] as $day)
                                 <div class="{{ $trendDays === 7 ? 'w-8 sm:w-10' : 'w-2 sm:w-3.5 md:w-5' }} shrink-0 flex flex-col items-center gap-1 group">

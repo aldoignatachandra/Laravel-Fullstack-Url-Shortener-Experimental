@@ -43,14 +43,14 @@ new #[Layout('layouts.app')] class extends Component
 }; ?>
 
 <div>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-surface-off-white leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
-
     <div class="py-6 sm:py-8 lg:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Header --}}
+            <div class="mb-8">
+                <h1 class="text-2xl font-medium text-surface-off-white">Dashboard</h1>
+                <p class="mt-1 text-sm text-surface-mid-gray">Overview of your links and analytics</p>
+            </div>
+
             {{-- Stats Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {{-- Total Links --}}

@@ -17,7 +17,7 @@ new class extends Component {
 
 <div x-data="{ sidebarOpen: false, confirmLogout: false, loggingOut: false, logoutComplete: false }"
     x-on:logout-complete.window="logoutComplete = true; setTimeout(() => { confirmLogout = false; window.location.href = '/'; }, 1000)"
-    class="relative lg:w-64">
+    class="relative h-full">
     <!-- Mobile Hamburger -->
     <button @click="sidebarOpen = !sidebarOpen"
         class="fixed top-4 left-4 z-40 p-2 rounded-md text-surface-mid-gray hover:text-surface-off-white hover:bg-surface-border border border-surface-border bg-surface-dark lg:hidden transition-colors duration-150">
@@ -35,10 +35,10 @@ new class extends Component {
 
     <!-- Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-        class="fixed lg:static lg:translate-x-0 inset-y-0 left-0 z-50 w-64 bg-surface-dark border-r border-surface-border flex flex-col transition-transform duration-300 ease-in-out"
+        class="fixed lg:static lg:translate-x-0 inset-y-0 left-0 z-50 w-64 bg-surface-dark border-r border-surface-border flex flex-col transition-transform duration-300 ease-in-out lg:h-full"
         x-cloak>
         <!-- Logo -->
-        <div class="flex items-center h-16 px-6 border-b border-surface-border shrink-0">
+        <div class="flex items-center py-6 px-6 border-b border-surface-border shrink-0">
             <a href="{{ route('dashboard') }}" wire:navigate class="text-xl font-bold text-brand tracking-tight">
                 shrt.dev
             </a>
@@ -75,8 +75,8 @@ new class extends Component {
             </a>
         </nav>
 
-        <!-- Bottom Section -->
-        <div class="px-3 py-4 border-t border-surface-border shrink-0">
+        <!-- User Actions -->
+        <div class="px-3 py-4 shrink-0 mt-auto border-t border-surface-border">
             <div class="flex items-center gap-3 px-3 mb-3">
                 <div class="flex-1 min-w-0">
                     <div class="text-sm font-medium text-surface-off-white truncate" x-data="{{ json_encode(['name' => auth()->user()?->name ?? '']) }}"
