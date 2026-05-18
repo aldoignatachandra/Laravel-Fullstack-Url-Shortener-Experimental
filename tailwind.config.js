@@ -31,6 +31,7 @@ export default {
                     "light-gray": "#b4b4b4",
                     "near-white": "#efefef",
                     "off-white": "#fafafa",
+                    card: "#1e1e1e",
                 },
             },
             borderRadius: {

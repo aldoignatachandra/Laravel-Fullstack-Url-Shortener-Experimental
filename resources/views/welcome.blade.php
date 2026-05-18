@@ -11,8 +11,14 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="font-sans antialiased bg-surface-dark text-surface-off-white">
+        {{-- Skip to content link for accessibility --}}
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand focus:text-surface-black focus:rounded-md focus:text-sm focus:font-medium">
+            Skip to content
+        </a>
+
         <div class="min-h-screen flex flex-col">
             {{-- Navbar --}}
             <nav x-data="{ open: false }" class="fixed top-0 left-0 right-0 z-50 bg-surface-black/80 backdrop-blur-md border-b border-surface-dark-border">
@@ -53,18 +59,35 @@
                 </div>
 
                 {{-- Mobile menu --}}
-                <div x-show="open" @click.away="open = false" class="md:hidden border-t border-surface-dark-border bg-surface-black/95 backdrop-blur-md">
-                    <div class="px-6 py-4 flex flex-col gap-4">
-                        <a href="#features" @click="open = false" class="text-surface-light-gray hover:text-surface-off-white transition-colors text-sm">
-                            Features
-                        </a>
-                        <a href="#developers" @click="open = false" class="text-surface-light-gray hover:text-surface-off-white transition-colors text-sm">
-                            Developers
-                        </a>
-                        <a href="{{ route('dashboard') }}" wire:navigate class="text-surface-light-gray hover:text-surface-off-white transition-colors text-sm">
-                            Open Dashboard
-                        </a>
-                        <a href="{{ route('register') }}" wire:navigate class="bg-brand text-surface-black rounded-md px-5 py-2 text-sm font-medium hover:bg-brand-dark transition-colors text-center">
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    @click.away="open = false" class="md:hidden border-t border-surface-dark-border bg-surface-black/95 backdrop-blur-md">
+                    <div class="px-4 py-5 space-y-4">
+                        {{-- Nav links row --}}
+                        <div class="flex items-center gap-1">
+                            <a href="#features" @click="open = false" class="flex-1 text-center py-2 rounded-md text-surface-light-gray hover:text-surface-off-white hover:bg-surface-border transition-colors text-sm">
+                                Features
+                            </a>
+                            <a href="#developers" @click="open = false" class="flex-1 text-center py-2 rounded-md text-surface-light-gray hover:text-surface-off-white hover:bg-surface-border transition-colors text-sm">
+                                Developers
+                            </a>
+                            <a href="{{ route('dashboard') }}" wire:navigate class="flex-1 text-center py-2 rounded-md text-surface-light-gray hover:text-surface-off-white hover:bg-surface-border transition-colors text-sm">
+                                Dashboard
+                            </a>
+                        </div>
+
+                        {{-- Divider --}}
+                        <div class="border-t border-surface-border"></div>
+
+                        {{-- CTA --}}
+                        <a href="{{ route('register') }}" wire:navigate class="flex items-center justify-center gap-2 w-full bg-brand text-surface-black rounded-pill px-6 py-2.5 text-sm font-medium hover:bg-brand-dark transition-colors">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
                             Get Started Free
                         </a>
                     </div>
@@ -72,13 +95,13 @@
             </nav>
 
             {{-- Hero Section --}}
-            <section class="relative flex flex-col items-center px-6 text-center pt-28 pb-20">
+            <section id="main-content" class="relative flex flex-col items-center px-4 sm:px-6 text-center pt-24 sm:pt-28 pb-20">
                 <div class="max-w-5xl mx-auto">
                     <span class="inline-block text-[11px] tracking-[0.2em] text-brand/70 uppercase font-semibold mb-6">
                         Open Source Link Management
                     </span>
 
-                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tight mb-8">
+                    <h1 class="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tight mb-8">
                         <span class="block text-surface-off-white">Shorten in seconds</span>
                         <span class="block text-brand">Scale to millions</span>
                     </h1>
@@ -139,7 +162,7 @@
                         </div>
                         <h3 class="text-surface-off-white text-lg font-medium mb-3">Lightning Short Links</h3>
                         <p class="text-surface-mid-gray text-sm leading-relaxed">
-                            Transform long URLs into clean, memorable short links instantly. Custom aliases, QR codes, and deep links coming soon.
+                            Transform long URLs into clean, memorable short links instantly. Track every click with real-time analytics.
                         </p>
                     </div>
 
@@ -182,7 +205,7 @@
                     </p>
                 </div>
 
-                <div class="bg-surface-black rounded-xl border border-surface-border overflow-hidden shadow-[0_0_30px_rgba(62,207,142,0.05)]">
+                <div class="bg-surface-black rounded-xl border border-surface-border overflow-hidden shadow-[0_0_30px_rgba(62,207,142,0.05)] max-w-full">
                     <div class="flex items-center gap-2 px-4 py-3 border-b border-surface-border bg-surface-dark/50">
                         <div class="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
                         <div class="w-3 h-3 rounded-full bg-[#febc2e]"></div>
@@ -205,7 +228,7 @@
             {{-- Bottom CTA Section --}}
             <section class="w-full bg-surface-black border-y border-surface-border">
                 <div class="max-w-4xl mx-auto px-6 py-16 text-center">
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-tight mb-6">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-tight mb-6">
                         <span class="block text-surface-off-white">Ready to shorten</span>
                         <span class="block text-brand">your first link?</span>
                     </h2>
@@ -227,7 +250,7 @@
             <footer class="w-full border-t border-surface-border">
                 <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <span class="text-surface-mid-gray text-sm">&copy; 2026 shrt.dev</span>
-                    <div class="flex items-center gap-6">
+                    <div class="flex flex-wrap items-center justify-center gap-6">
                         <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z" clip-rule="evenodd" />
@@ -238,11 +261,17 @@
                             <span class="w-1.5 h-1.5 rounded-full bg-brand"></span>
                             Open Source
                         </a>
-                        <a href="{{ route('login') }}" wire:navigate class="text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">Login</a>
-                        <a href="{{ route('register') }}" wire:navigate class="text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">Register</a>
+                        @guest
+                            <a href="{{ route('login') }}" wire:navigate class="text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">Login</a>
+                            <a href="{{ route('register') }}" wire:navigate class="text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">Register</a>
+                        @else
+                            <a href="{{ route('dashboard') }}" wire:navigate class="text-surface-mid-gray hover:text-surface-light-gray text-sm transition-colors">Dashboard</a>
+                        @endguest
                     </div>
                 </div>
             </footer>
         </div>
+
+        @livewireScripts
     </body>
 </html>

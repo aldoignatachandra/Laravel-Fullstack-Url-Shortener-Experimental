@@ -8,6 +8,11 @@ use Illuminate\Support\Str;
 class ShortCodeService
 {
     /**
+     * Maximum attempts to generate a unique short code.
+     */
+    public const MAX_GENERATION_ATTEMPTS = 10;
+
+    /**
      * Generate a random alphanumeric short code.
      */
     public static function generate(int $length = 6): string
@@ -20,8 +25,10 @@ class ShortCodeService
      *
      * @throws \RuntimeException when unable to generate a unique code
      */
-    public static function generateUnique(int $maxAttempts = 3): string
+    public static function generateUnique(?int $maxAttempts = null): string
     {
+        $maxAttempts ??= self::MAX_GENERATION_ATTEMPTS;
+
         for ($i = 0; $i < $maxAttempts; $i++) {
             $code = static::generate();
 

@@ -109,7 +109,7 @@ new #[Layout('layouts.guest')] class extends Component {
             </label>
         </div>
 
-        <div class="flex items-center justify-between mt-4 transition-opacity"
+        <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between mt-4 transition-opacity"
              wire:loading.class="pointer-events-none opacity-50"
              wire:target="login">
             <a class="group text-sm transition-colors" href="{{ route('register') }}" wire:navigate>

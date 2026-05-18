@@ -1,28 +1,34 @@
 <?php
 
+use App\Http\Requests\StoreLinkRequest;
 use App\Models\Link;
 use App\Models\LinkLog;
 use App\Services\ShortCodeService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::get('/s/{short_code}', function (string $short_code) {
     $link = Link::where('short_code', $short_code)
-        ->where('status', 1)
+        ->where('status', Link::STATUS_ACTIVE)
         ->firstOrFail();
+
+    // Validate URL scheme to prevent open redirect attacks
+    $parsedUrl = parse_url($link->original_url);
+    if (! in_array($parsedUrl['scheme'] ?? '', ['http', 'https'], true)) {
+        abort(404);
+    }
 
     LinkLog::create([
         'link_id' => $link->id,
         'clicked_at' => now(),
         'ip_address' => request()->ip(),
-        'user_agent' => request()->userAgent(),
-        'referrer' => request()->header('referer'),
+        'user_agent' => mb_substr(request()->userAgent() ?? '', 0, 500),
+        'referrer' => filter_var(request()->header('referer'), FILTER_VALIDATE_URL) ?: null,
     ]);
 
     return redirect($link->original_url, 301);
-})->name('redirect');
+})->middleware('smart.throttle:api')->name('redirect');
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -35,22 +41,19 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('links', 'links.index')->name('links.index');
 
-    Route::post('/links', function (Request $request) {
-        $validated = $request->validate([
-            'original_url' => 'required|url|max:2048',
-            'title' => 'nullable|string|max:100',
-        ]);
+    Route::post('/links', function (StoreLinkRequest $request) {
+        $validated = $request->validated();
 
         Link::create([
             'user_id' => auth()->id(),
             'original_url' => $validated['original_url'],
             'title' => $validated['title'] ?: null,
             'short_code' => ShortCodeService::generateUnique(),
-            'status' => 1,
+            'status' => Link::STATUS_ACTIVE,
         ]);
 
         return redirect('/links');
-    })->name('links.store');
+    })->middleware('smart.throttle:strict-api')->name('links.store');
 
     Route::delete('/links/{link}', function (Link $link) {
         Gate::authorize('delete', $link);

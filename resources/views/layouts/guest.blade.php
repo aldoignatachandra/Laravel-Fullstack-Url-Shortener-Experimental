@@ -15,14 +15,14 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-surface-off-white antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-surface-black">
-            <div>
+        <div class="min-h-screen flex flex-col sm:justify-center items-center px-4 sm:px-0 bg-surface-black pt-[20vh] sm:pt-0">
+            <div class="mb-6">
                 <a href="/" wire:navigate class="text-2xl font-bold text-brand tracking-tight">
                     shrt.dev
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-6 bg-surface-dark border border-surface-border overflow-hidden rounded-lg">
+            <div class="w-full sm:max-w-md px-6 py-6 bg-surface-dark border border-surface-border overflow-hidden rounded-lg">
                 {{ $slot }}
             </div>
         </div>

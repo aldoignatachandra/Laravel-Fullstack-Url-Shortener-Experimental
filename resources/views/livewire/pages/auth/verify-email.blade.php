@@ -46,7 +46,7 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <x-primary-button wire:click="sendVerification">
             {{ __('Resend Verification Email') }}
         </x-primary-button>

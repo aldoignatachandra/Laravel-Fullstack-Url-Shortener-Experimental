@@ -17,7 +17,15 @@ new class extends Component {
 
 <div x-data="{ sidebarOpen: false, confirmLogout: false, loggingOut: false, logoutComplete: false }"
     x-on:logout-complete.window="logoutComplete = true; setTimeout(() => { confirmLogout = false; window.location.href = '/'; }, 1000)"
-    class="flex">
+    class="relative lg:w-64">
+    <!-- Mobile Hamburger -->
+    <button @click="sidebarOpen = !sidebarOpen"
+        class="fixed top-4 left-4 z-40 p-2 rounded-md text-surface-mid-gray hover:text-surface-off-white hover:bg-surface-border border border-surface-border bg-surface-dark lg:hidden transition-colors duration-150">
+        <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
     <!-- Mobile Sidebar Overlay -->
     <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -152,12 +160,4 @@ new class extends Component {
             </div>
         </div>
     </div>
-
-    <!-- Mobile Hamburger (visible only when sidebar is closed) -->
-    <button @click="sidebarOpen = !sidebarOpen"
-        class="fixed top-4 left-4 z-30 p-2 rounded-md text-surface-mid-gray hover:text-surface-off-white hover:bg-surface-border border border-surface-border bg-surface-dark lg:hidden transition-colors duration-150">
-        <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-    </button>
 </div>

@@ -20,6 +20,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public bool $showDeleteModal = false;
 
+    public bool $showDiscardConfirm = false;
+
     public ?int $deletingLinkId = null;
 
     public string $deletingLinkTitle = '';
@@ -71,6 +73,29 @@ new #[Layout('layouts.app')] class extends Component
         $this->deletingLinkShortUrl = '';
     }
 
+    public function attemptCloseCreateModal(): void
+    {
+        if (! empty($this->original_url) || ! empty($this->title)) {
+            $this->showDiscardConfirm = true;
+
+            return;
+        }
+
+        $this->closeCreateModal();
+    }
+
+    public function closeCreateModal(): void
+    {
+        $this->showCreateModal = false;
+        $this->showDiscardConfirm = false;
+        $this->reset(['original_url', 'title']);
+    }
+
+    public function discardAndClose(): void
+    {
+        $this->closeCreateModal();
+    }
+
     public function deleteSelectedLink(): void
     {
         if ($this->deletingLinkId === null) {
@@ -92,10 +117,10 @@ new #[Layout('layouts.app')] class extends Component
 }; ?>
 
 <div>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-8 lg:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {{-- Header --}}
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div>
                     <h1 class="text-2xl font-medium text-surface-off-white">Short URLs</h1>
                     <p class="mt-1 text-sm text-surface-mid-gray">Manage your shortened links</p>
@@ -117,7 +142,7 @@ new #[Layout('layouts.app')] class extends Component
 
             {{-- Create Modal --}}
             @if ($showCreateModal)
-                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" wire:click="$set('showCreateModal', false)">
+                <div class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60" wire:click="attemptCloseCreateModal">
                     <div class="w-full max-w-md mx-4 p-6 rounded-lg bg-surface-dark border border-surface-border" onclick="event.stopPropagation()">
                         <h2 class="text-lg font-medium text-surface-off-white mb-4">Create Short URL</h2>
 
@@ -156,16 +181,24 @@ new #[Layout('layouts.app')] class extends Component
                             <div class="flex items-center justify-end gap-3">
                                 <button
                                     type="button"
-                                    wire:click="$set('showCreateModal', false)"
+                                    wire:click="attemptCloseCreateModal"
                                     class="px-4 py-2 text-sm rounded-md border border-surface-border text-surface-light-gray hover:text-surface-off-white hover:border-surface-mid-border transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    class="px-6 py-2 text-sm font-medium rounded-pill bg-brand text-surface-black hover:opacity-90 transition-opacity"
+                                    wire:loading.attr="disabled"
+                                    class="px-6 py-2 text-sm font-medium rounded-pill bg-brand text-surface-black hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Create
+                                    <span wire:loading.remove>Create</span>
+                                    <span wire:loading class="inline-flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating...
+                                    </span>
                                 </button>
                             </div>
                         </form>
@@ -173,10 +206,40 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
             @endif
 
+            {{-- Discard Confirmation Modal --}}
+            @if ($showDiscardConfirm)
+                <div
+                    class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
+                    x-data
+                    x-on:keydown.escape.window="$wire.call('discardAndClose')"
+                >
+                    <div class="w-full max-w-sm mx-4 p-6 rounded-xl bg-surface-dark border border-surface-border">
+                        <h3 class="text-lg font-medium text-surface-off-white mb-2">Discard changes?</h3>
+                        <p class="text-sm text-surface-mid-gray mb-5">You have unsaved changes. Are you sure you want to close this form?</p>
+                        <div class="flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                wire:click="$set('showDiscardConfirm', false)"
+                                class="px-4 py-2 text-sm rounded-md border border-surface-border text-surface-light-gray hover:text-surface-off-white hover:border-surface-mid-border transition-colors"
+                            >
+                                Keep Editing
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="discardAndClose"
+                                class="px-4 py-2 text-sm font-medium rounded-md bg-rose-500 text-white hover:bg-rose-600 transition-colors"
+                            >
+                                Discard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Delete Confirmation Modal --}}
             @if ($showDeleteModal)
                 <div
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                    class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
                     x-data
                     x-on:keydown.escape.window="$wire.call('closeDeleteModal')"
                     wire:click="closeDeleteModal"
@@ -255,7 +318,7 @@ new #[Layout('layouts.app')] class extends Component
                                 </a>
 
                                 {{-- Original URL --}}
-                                <p class="mt-1 text-xs text-surface-mid-gray truncate max-w-lg">
+                                <p class="mt-1 text-xs text-surface-mid-gray truncate max-w-full sm:max-w-lg">
                                     {{ Str::limit($link->original_url, 80) }}
                                 </p>
 
@@ -293,7 +356,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <button
                                     type="button"
                                     wire:click="confirmDelete({{ $link->id }})"
-                                    class="h-9 px-3.5 inline-flex items-center gap-2 text-sm rounded-md border border-rose-500/30 text-rose-400 bg-rose-500/10 hover:text-rose-300 hover:bg-rose-500/20 hover:border-rose-500/40 transition-colors ml-1"
+                                    class="h-9 px-3.5 inline-flex items-center gap-2 text-sm rounded-md border border-rose-500/30 text-rose-400 bg-rose-500/10 hover:text-rose-300 hover:bg-rose-500/20 hover:border-rose-500/40 transition-colors"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />

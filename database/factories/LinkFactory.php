@@ -32,7 +32,7 @@ class LinkFactory extends Factory
             'title' => fake()->sentence(3),
             'original_url' => fake()->url(),
             'short_code' => Str::random(6),
-            'status' => 1,
+            'status' => Link::STATUS_ACTIVE,
         ];
     }
 
@@ -41,8 +41,8 @@ class LinkFactory extends Factory
      */
     public function archived(): static
     {
-        return $this->state(fn(array $attributes) => [
-            'status' => 2,
+        return $this->state(fn (array $attributes) => [
+            'status' => Link::STATUS_ARCHIVED,
         ]);
     }
 }

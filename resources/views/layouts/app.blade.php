@@ -19,7 +19,7 @@
             <livewire:layout.navigation />
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col min-w-0">
+            <div class="flex-1 flex flex-col min-w-0 pt-16 lg:pt-0">
                 <!-- Page Heading -->
                 @if (isset($header))
                     <header class="border-b border-surface-border">

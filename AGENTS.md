@@ -1,4 +1,22 @@
 <laravel-boost-guidelines>
+=== user rules ===
+
+# User Interaction Rules
+
+These rules are defined by the user and must be followed in every interaction.
+
+1. **Laravel Boost MCP First** — Always use Laravel Boost MCP (`search-docs`, `database-query`, `database-schema`, etc.) as the primary reference when working with Laravel code. Do not skip this step.
+
+2. **JavaScript Comparison** — When explaining PHP/Laravel concepts, always compare with JavaScript (Node.js/Bun+Hono). The user's expertise is in JavaScript and they are learning PHP/Laravel professionally.
+
+3. **Proactive Agent Usage** — Be proactive in using available specialist agents instead of doing everything via orchestrator:
+    - `@designer` — UI/UX design, styling, visual review
+    - `@fixer` — Fast code edits, test writing, implementation
+    - `@explorer` — Codebase search, pattern matching
+    - `@oracle` — Architecture decisions, code review, debugging
+    - `@librarian` — Library docs lookup, API references
+    - Each agent has different skills, MCPs, and models — use them strategically.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -95,7 +113,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
 - Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
+    - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
 
 === php rules ===
 

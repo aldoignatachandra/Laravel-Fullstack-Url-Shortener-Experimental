@@ -20,11 +20,12 @@ new #[Layout('layouts.app')] class extends Component
 
     public function getClickCountProperty(): int
     {
-        return $this->link->logs()->count();
+        return $this->link->logs_count ?? $this->link->clickCount();
     }
 
     public function getUniqueVisitorsProperty(): int
     {
+        // Use subquery for unique visitors count
         return $this->link->logs()->distinct('ip_address')->count('ip_address');
     }
 
@@ -88,7 +89,7 @@ new #[Layout('layouts.app')] class extends Component
 
 <div>
     <div class="min-h-screen bg-surface-dark text-surface-off-white">
-        <div class="max-w-5xl mx-auto px-6 py-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             {{-- Back button --}}
             <a href="{{ route('links.index') }}" wire:navigate class="inline-flex items-center gap-2 text-surface-mid-gray hover:text-surface-off-white text-sm transition-colors mb-6">
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -178,22 +179,44 @@ new #[Layout('layouts.app')] class extends Component
                         <p class="text-sm text-surface-mid-gray">No clicks in this period</p>
                     </div>
                 @else
-                    <div class="flex items-end justify-center {{ $trendDays === 7 ? 'gap-2' : 'gap-1.5' }}" aria-label="Clicks trend chart" role="img">
-                        @foreach($this->trendData['days'] as $day)
-                            <div class="{{ $trendDays === 7 ? 'w-10' : 'w-3.5 sm:w-5' }} shrink-0 flex flex-col items-center gap-1 group">
-                                <div class="w-full h-32 flex items-end">
-                                    <div class="w-full rounded-t-sm transition-colors relative {{ $day['count'] > 0 ? 'bg-brand/40 hover:bg-brand/60 min-h-[4px]' : 'bg-surface-border min-h-px' }}"
-                                         title="{{ $day['label'] }}: {{ $day['count'] }} clicks"
-                                         style="height: {{ $day['count'] > 0 ? max(4, round(($day['count'] / $this->trendData['max']) * 128)) : 2 }}px">
+                    {{-- Accessible data table for screen readers (hidden visually) --}}
+                    <table class="sr-only" aria-label="Clicks trend data">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Clicks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($this->trendData['days'] as $day)
+                                <tr>
+                                    <td>{{ $day['label'] }}</td>
+                                    <td>{{ $day['count'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    {{-- Visual bar chart --}}
+                    <div class="overflow-x-auto pb-2 -mx-2 px-2">
+                        <div class="flex items-end justify-center min-w-max {{ $trendDays === 7 ? 'gap-2' : 'gap-1 sm:gap-1.5' }}" role="img" aria-label="Clicks trend chart showing {{ $this->trendData['total'] }} total clicks over {{ $trendDays }} days">
+                            @foreach($this->trendData['days'] as $day)
+                                <div class="{{ $trendDays === 7 ? 'w-8 sm:w-10' : 'w-2 sm:w-3.5 md:w-5' }} shrink-0 flex flex-col items-center gap-1 group">
+                                    <div class="w-full h-32 flex items-end">
+                                        <div class="w-full rounded-t-sm transition-colors relative {{ $day['count'] > 0 ? 'bg-brand/40 hover:bg-brand/60 min-h-[4px]' : 'bg-surface-border min-h-px' }}"
+                                             title="{{ $day['label'] }}: {{ $day['count'] }} clicks"
+                                             aria-hidden="true"
+                                             style="height: {{ $day['count'] > 0 ? max(4, round(($day['count'] / $this->trendData['max']) * 128)) : 2 }}px">
+                                        </div>
                                     </div>
+                                    <span class="text-[10px] text-surface-dark-gray leading-none hidden sm:block h-3 text-center">
+                                        @if(count($this->trendData['days']) <= 10 || $loop->index % 5 === 0 || $loop->last)
+                                            {{ $day['label'] }}
+                                        @endif
+                                    </span>
                                 </div>
-                                <span class="text-[10px] text-surface-dark-gray leading-none hidden sm:block h-3 text-center">
-                                    @if(count($this->trendData['days']) <= 10 || $loop->index % 5 === 0 || $loop->last)
-                                        {{ $day['label'] }}
-                                    @endif
-                                </span>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
                 @endif
             </div>
@@ -220,7 +243,7 @@ new #[Layout('layouts.app')] class extends Component
                     <div class="space-y-3">
                         @foreach($this->topReferrers as $ref)
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-surface-light-gray truncate max-w-[80%]">{{ $ref->referrer }}</span>
+                                <span class="text-sm text-surface-light-gray truncate max-w-[70%] sm:max-w-[80%]">{{ $ref->referrer }}</span>
                                 <span class="text-sm text-surface-mid-gray shrink-0 ml-4">{{ $ref->total }} clicks</span>
                             </div>
                         @endforeach

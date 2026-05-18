@@ -99,7 +99,7 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- OTP -->
         <div>
             <x-input-label for="otp" :value="__('Reset Code')" />
-            <x-text-input wire:model="otp" id="otp" class="block mt-1 w-full text-center text-2xl tracking-[0.5em]" type="text" name="otp" maxlength="6" inputmode="numeric" pattern="[0-9]*" required autofocus autocomplete="one-time-code" placeholder="000000" />
+            <x-text-input wire:model="otp" id="otp" class="block mt-1 w-full text-center text-xl sm:text-2xl tracking-[0.5em]" type="text" name="otp" maxlength="6" inputmode="numeric" pattern="[0-9]*" required autofocus autocomplete="one-time-code" placeholder="000000" />
             <x-input-error :messages="$errors->get('otp')" class="mt-2" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -119,7 +119,7 @@ new #[Layout('layouts.guest')] class extends Component
             </button>
         </div>
 
-        <div class="flex items-center justify-between mt-6">
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between mt-6">
             <a href="{{ route('password.request') }}" wire:navigate class="inline-flex items-center gap-1.5 text-sm text-surface-mid-gray hover:text-surface-off-white transition-colors">
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
