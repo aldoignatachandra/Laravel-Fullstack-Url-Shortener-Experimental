@@ -24,10 +24,27 @@ Route::get('/s/{short_code}', function (string $short_code, Request $request) {
         ->where('status', Link::STATUS_ACTIVE)
         ->firstOrFail();
 
-    // Validate URL scheme to prevent open redirect attacks
+    // Validate URL to prevent SSRF and open redirect attacks
     $parsedUrl = parse_url($link->original_url);
-    if (! in_array($parsedUrl['scheme'] ?? '', ['http', 'https'], true)) {
+    $scheme = $parsedUrl['scheme'] ?? '';
+    $host = $parsedUrl['host'] ?? '';
+
+    // 1. Only allow http/https
+    if (! in_array($scheme, ['http', 'https'], true)) {
         abort(404);
+    }
+
+    // 2. Block localhost variants
+    $blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'];
+    if (in_array($host, $blockedHosts, true)) {
+        abort(404);
+    }
+
+    // 3. Block private/reserved IP ranges (AWS metadata, internal networks)
+    if (filter_var($host, FILTER_VALIDATE_IP)) {
+        if (! filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            abort(404);
+        }
     }
 
     LinkLog::create([
