@@ -5,6 +5,7 @@ use App\Http\Requests\StoreLinkRequest;
 use App\Models\Link;
 use App\Models\LinkLog;
 use App\Services\ShortCodeService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -72,15 +73,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/links', function (StoreLinkRequest $request) {
         $validated = $request->validated();
 
-        Link::create([
-            'user_id' => Auth::id(),
-            'original_url' => $validated['original_url'],
-            'title' => $validated['title'] ?: null,
-            'short_code' => ShortCodeService::generateUnique(),
-            'status' => Link::STATUS_ACTIVE,
-        ]);
+        $maxAttempts = ShortCodeService::MAX_GENERATION_ATTEMPTS;
 
-        return redirect('/links');
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            try {
+                Link::create([
+                    'user_id' => Auth::id(),
+                    'original_url' => $validated['original_url'],
+                    'title' => $validated['title'] ?: null,
+                    'short_code' => ShortCodeService::generateUnique(),
+                    'status' => Link::STATUS_ACTIVE,
+                ]);
+
+                return redirect('/links');
+            } catch (QueryException $e) {
+                // Duplicate short_code — retry with a new code
+                if ($attempt === $maxAttempts - 1) {
+                    throw $e;
+                }
+            }
+        }
     })->middleware('smart.throttle:strict-api')->name('links.store');
 
     Route::delete('/links/{link}', function (Link $link) {
@@ -100,4 +112,4 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

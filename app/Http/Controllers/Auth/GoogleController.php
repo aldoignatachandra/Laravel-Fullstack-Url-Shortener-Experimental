@@ -28,7 +28,11 @@ class GoogleController extends Controller
      */
     public function callback(): RedirectResponse
     {
-        $googleUser = Socialite::driver('google')->user();
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Authentication failed. Please try again.');
+        }
 
         // Case 1: User already linked with Google
         $user = User::where('google_id', $googleUser->getId())->first();
