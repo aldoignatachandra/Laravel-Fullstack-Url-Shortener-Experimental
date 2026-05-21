@@ -51,7 +51,7 @@ Route::get('/s/{short_code}', function (string $short_code, Request $request) {
     LinkLog::create([
         'link_id' => $link->id,
         'clicked_at' => now(),
-        'ip_address' => $request->ip(),
+        'ip_address' => hash('sha256', $request->ip().config('app.key')),
         'user_agent' => mb_substr($request->userAgent() ?? '', 0, 500),
         'referrer' => filter_var($request->header('referer'), FILTER_VALIDATE_URL) ?: null,
     ]);
@@ -112,4 +112,4 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

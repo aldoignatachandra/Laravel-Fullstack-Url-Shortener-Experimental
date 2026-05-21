@@ -301,7 +301,7 @@ class PasswordResetOtpTest extends TestCase
 
     public function test_successful_verify_otp_does_not_clear_guest_ip_rate_limit(): void
     {
-        for ($attempt = 1; $attempt <= 9; $attempt++) {
+        for ($attempt = 1; $attempt <= 4; $attempt++) {
             PasswordResetOtp::create([
                 'email' => "success-limit-{$attempt}@example.com",
                 'otp' => Hash::make('123456'),

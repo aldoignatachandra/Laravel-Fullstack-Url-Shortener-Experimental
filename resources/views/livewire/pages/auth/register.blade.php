@@ -28,7 +28,7 @@ new #[Layout('layouts.guest')] class extends Component {
         // Check if email belongs to a Google user
         $existingUser = User::where('email', $validated['email'])->first();
         if ($existingUser && $existingUser->isGoogleUser()) {
-            $this->addError('email', 'This email is linked to a Google account. Please login with Google.');
+            $this->addError('email', 'An account with this email already exists. Please log in.');
 
             return;
         }

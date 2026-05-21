@@ -80,8 +80,10 @@ class LinkRedirectTest extends TestCase
             'Referer' => 'https://twitter.com',
         ]);
 
+        $hashedIp = hash('sha256', '127.0.0.1'.config('app.key'));
+
         $this->assertDatabaseHas('link_logs', [
-            'ip_address' => '127.0.0.1',
+            'ip_address' => $hashedIp,
             'user_agent' => 'TestBrowser/1.0',
             'referrer' => 'https://twitter.com',
         ]);

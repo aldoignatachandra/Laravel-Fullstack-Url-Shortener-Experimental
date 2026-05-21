@@ -39,7 +39,7 @@ class RateLimitPolicy
         return [
             new RateLimitBucket(
                 key: RateLimitKey::actor($request, 'password-reset-verification:15-minutes'),
-                maxAttempts: 10,
+                maxAttempts: 5,
                 decaySeconds: 15 * 60,
             ),
             new RateLimitBucket(
@@ -49,7 +49,7 @@ class RateLimitPolicy
             ),
             new RateLimitBucket(
                 key: RateLimitKey::actor($request, 'password-reset-verification:hour'),
-                maxAttempts: 30,
+                maxAttempts: 15,
                 decaySeconds: 60 * 60,
             ),
         ];
