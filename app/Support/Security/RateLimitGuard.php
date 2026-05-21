@@ -2,12 +2,13 @@
 
 namespace App\Support\Security;
 
+use App\Services\MetricsService;
 use Illuminate\Support\Facades\RateLimiter;
 
 class RateLimitGuard
 {
     /**
-     * @param  array<int, RateLimitBucket>  $buckets
+     * @param array<int, RateLimitBucket> $buckets
      */
     public function attempt(array $buckets): RateLimitResult
     {
@@ -20,6 +21,8 @@ class RateLimitGuard
             );
 
             if (! $executed) {
+                MetricsService::rateLimitHit($bucket->key);
+
                 return RateLimitResult::blocked(RateLimiter::availableIn($bucket->key));
             }
         }

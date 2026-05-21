@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -34,6 +36,15 @@ class AppServiceProvider extends ServiceProvider
         // the otp_verified_email session key should not persist.
         Event::listen(Login::class, function (Login $event): void {
             session()->forget('otp_verified_email');
+        });
+
+        // Pulse dashboard access — restrict to allowed emails from .env
+        Gate::define('viewPulse', function (User $user) {
+            $allowedEmails = array_filter(
+                explode(',', env('PULSE_ALLOWED_EMAILS', ''))
+            );
+
+            return in_array($user->email, $allowedEmails);
         });
     }
 }

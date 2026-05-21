@@ -135,6 +135,11 @@ return [
     |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        // Required by Laravel Pulse (workaround for Pulse v1.7.x + Laravel 13 compatibility)
+        Illuminate\Support\Collection::class,
+        stdClass::class,
+        Carbon\CarbonImmutable::class,
+    ],
 
 ];

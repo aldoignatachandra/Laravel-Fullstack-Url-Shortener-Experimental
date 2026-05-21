@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Requests\StoreLinkRequest;
 use App\Models\Link;
 use App\Models\LinkLog;
+use App\Services\MetricsService;
 use App\Services\ShortCodeService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -56,6 +57,8 @@ Route::get('/s/{short_code}', function (string $short_code, Request $request) {
         'referrer' => filter_var($request->header('referer'), FILTER_VALIDATE_URL) ?: null,
     ]);
 
+    MetricsService::redirectHit($short_code);
+
     return redirect($link->original_url, 301);
 })->middleware('smart.throttle:api')->name('redirect');
 
@@ -84,6 +87,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     'short_code' => ShortCodeService::generateUnique(),
                     'status' => Link::STATUS_ACTIVE,
                 ]);
+
+                MetricsService::linkCreated(Auth::id());
 
                 return redirect('/links');
             } catch (QueryException $e) {
