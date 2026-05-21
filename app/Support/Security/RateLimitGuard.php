@@ -12,13 +12,16 @@ class RateLimitGuard
     public function attempt(array $buckets): RateLimitResult
     {
         foreach ($buckets as $bucket) {
-            if (RateLimiter::tooManyAttempts($bucket->key, $bucket->maxAttempts)) {
+            $executed = RateLimiter::attempt(
+                $bucket->key,
+                $bucket->maxAttempts,
+                fn () => true,
+                $bucket->decaySeconds,
+            );
+
+            if (! $executed) {
                 return RateLimitResult::blocked(RateLimiter::availableIn($bucket->key));
             }
-        }
-
-        foreach ($buckets as $bucket) {
-            RateLimiter::hit($bucket->key, $bucket->decaySeconds);
         }
 
         return RateLimitResult::allowed();

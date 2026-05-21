@@ -4,6 +4,8 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Socialite\Socialite;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
 
 class GoogleAuthTest extends TestCase
@@ -109,5 +111,52 @@ class GoogleAuthTest extends TestCase
 
         // Should not create a new user with same email
         $this->assertEquals(1, User::where('email', 'test@example.com')->count());
+    }
+
+    public function test_google_auto_link_blocked_for_unverified_account(): void
+    {
+        // Create an unverified manual user
+        $user = User::factory()->unverified()->create(['email' => 'victim@example.com']);
+
+        // Fake Socialite to return a Google user with same email
+        Socialite::fake('google', (new SocialiteUser)->map([
+            'id' => 'google-123',
+            'name' => 'Attacker',
+            'email' => 'victim@example.com',
+            'avatar' => 'https://example.com/avatar.jpg',
+        ]));
+
+        $response = $this->get('/auth/google/callback');
+
+        // Should redirect to login with error, not auto-link
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('error');
+
+        // User should still have no google_id
+        $user->refresh();
+        $this->assertNull($user->google_id);
+    }
+
+    public function test_google_auto_link_allowed_for_verified_account(): void
+    {
+        // Create a verified manual user
+        $user = User::factory()->create(['email' => 'verified@example.com']);
+
+        // Fake Socialite to return a Google user with same email
+        Socialite::fake('google', (new SocialiteUser)->map([
+            'id' => 'google-456',
+            'name' => 'Verified User',
+            'email' => 'verified@example.com',
+            'avatar' => 'https://example.com/avatar2.jpg',
+        ]));
+
+        $response = $this->get('/auth/google/callback');
+
+        // Should auto-link and redirect to dashboard
+        $response->assertRedirect(route('dashboard'));
+
+        // User should now have google_id
+        $user->refresh();
+        $this->assertEquals('google-456', $user->google_id);
     }
 }

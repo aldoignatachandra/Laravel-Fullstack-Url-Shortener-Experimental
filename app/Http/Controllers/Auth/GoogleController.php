@@ -43,11 +43,18 @@ class GoogleController extends Controller
         $existingUser = User::where('email', $googleUser->getEmail())->first();
 
         if ($existingUser) {
+            // Only auto-link if the existing account's email was verified via the app.
+            // This prevents account takeover where an attacker creates a Google account
+            // with the victim's email and auto-links to their unverified account.
+            if (! $existingUser->email_verified_at) {
+                return redirect()->route('login')
+                    ->with('error', 'Please verify your email first, then link Google from your profile.');
+            }
+
             // Auto-link Google to existing account
             $existingUser->update([
                 'google_id' => $googleUser->getId(),
                 'google_avatar' => $googleUser->getAvatar(),
-                'email_verified_at' => $existingUser->email_verified_at ?? now(),
             ]);
 
             Auth::login($existingUser);

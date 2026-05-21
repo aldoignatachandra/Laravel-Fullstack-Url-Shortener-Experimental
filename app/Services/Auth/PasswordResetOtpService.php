@@ -129,6 +129,7 @@ class PasswordResetOtpService
         }
 
         $otpRecord->update(['used_at' => now()]);
+        session()->regenerate();
         session()->put('otp_verified_email', $email);
 
         return $email;
