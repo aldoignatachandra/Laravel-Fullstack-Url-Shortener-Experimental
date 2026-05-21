@@ -33,10 +33,10 @@ class SendOtpNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Password Reset Code')
-            ->greeting('Hello!')
-            ->line("Your password reset code is: **{$this->otp}**")
-            ->line('This code will expire in 15 minutes.')
-            ->line('If you did not request this, please ignore this email.');
+            ->subject('Your Password Reset Code - shrt.dev')
+            ->markdown('mail.otp', [
+                'otp' => $this->otp,
+                'user' => $notifiable,
+            ]);
     }
 }

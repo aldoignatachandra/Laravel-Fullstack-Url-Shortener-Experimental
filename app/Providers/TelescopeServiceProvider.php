@@ -11,12 +11,34 @@ use Laravel\Telescope\TelescopeApplicationServiceProvider;
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
     /**
+     * Configure the Telescope authorization services.
+     *
+     * Override parent's authorization to enforce email check in ALL environments.
+     */
+    protected function authorization(): void
+    {
+        $this->gate();
+
+        Telescope::auth(function ($request) {
+            $user = $request->user();
+
+            if (!$user) {
+                return false;
+            }
+
+            $allowedEmails = array_filter(
+                explode(',', env('TELESCOPE_ALLOWED_EMAILS', ''))
+            );
+
+            return in_array($user->email, $allowedEmails);
+        });
+    }
+
+    /**
      * Register any application services.
      */
     public function register(): void
     {
-        // Telescope::night();
-
         $this->hideSensitiveRequestDetails();
 
         $isLocal = $this->app->environment('local');
@@ -52,14 +74,16 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     /**
      * Register the Telescope gate.
      *
-     * This gate determines who can access Telescope in non-local environments.
+     * This gate determines who can access Telescope in all environments.
      */
     protected function gate(): void
     {
         Gate::define('viewTelescope', function (User $user) {
-            return in_array($user->email, [
-                //
-            ]);
+            $allowedEmails = array_filter(
+                explode(',', env('TELESCOPE_ALLOWED_EMAILS', ''))
+            );
+
+            return in_array($user->email, $allowedEmails);
         });
     }
 }
